@@ -1,3 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_tracking,access.tracking,model_hg_tracking,group_hg_dhl_user,1,1,1,1
-access_tracking1,access.tracking1,model_hg_tracking_event,group_hg_dhl_user,1,1,1,1
