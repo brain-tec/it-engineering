@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model="ir.module.module" id="base.module_operations_hg_dhl">
+        <field name="name">hg_dhl_tracking_module</field>
+        <field name="shortdesc">Hg_Dhl_Tracking</field>
+        <field name="category_id" ref="base.module_category_hg_dhl"/>
+        <field name="application" eval="True"/>
+        <field name="summary">DHL Tracking Data Base</field>
+        <field name="license"></field>
+        <field name="author">HG it-engineering</field>
+        <field name="to_buy" eval="False"/>
+        <field name="icon">/it-engineering/hg_dhl/static/description/icon.png</field>
+<!--        <field name="website"></field>-->
+    </record>
+
+
+    <record id="base.module_category_hg_dhl" model="ir.module.category">
+        <field name="description">Get DHL tracking data and store locally</field>
+        <field name="sequence">3</field>
+    </record>
+
+<!--    <record id="group_hg_dhl_user" model="res.groups">-->
+<!--        <field name="name">User</field>-->
+<!--        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>-->
+<!--        <field name="category_id" ref="base.module_category_operations_hg_dhl"/>-->
+<!--    </record>-->
+</odoo>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo xmlns:align="http://www.w3.org/2001/XMLSchema">
+    <!--action item to get the DHL information-->
+    <record id="get_tracking_no" model="ir.actions.server">
+        <field name="name">Get DHL Tracking</field>
+        <field name="model_id" ref="model_hg_tracking"/>
+        <field name="binding_model_id" ref="model_hg_tracking"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.get_tracking()</field>
+    </record>
+
+    <!--Tree View for list screen-->
+    <record id="view_hg_tracking_tree" model="ir.ui.view">
+        <field name="name">hg.tracking.tree</field>
+        <field name="model">hg.tracking</field>
+        <field name="field_parent"></field>
+        <field name="arch" type="xml">
+            <tree string="List of Trackings">
+                <field name="delivery"/>
+                <field name="tracking_no"/>
+                <field name="pan_recipient_address"/>
+                <field name="product_name"/>
+                <field name="status_timestamp"/>
+                <field name="status"/>
+                <field name="recipient_id_text"/>
+                <field name="complete"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--Form View for detail screen-->
+    <record id="view_hg_tracking_form" model="ir.ui.view">
+        <field name="name">hg.tracking.form</field>
+        <field name="model">hg.tracking</field>
+        <field name="arch" type="xml">
+            <form string="Tracking" class="o_hg_tracking">
+<!--                </header>-->
+                <h1>
+                    Lieferung:
+                    <field name="delivery"/>
+                </h1>
+                <group>
+                    <group>
+                        <field name="tracking_no"/>
+                        <field name="pan_recipient_address"/>
+                        <field name="product_name"/>
+                        <field name="recipient_id_text"/>
+                        <field name="status"/>
+                        <field name="status_timestamp"/>
+                    </group>
+                    <group>
+                        <field name="image" widget='image'/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="Main" name="main">
+
+                        <field name="event_line" widget="section_and_note_one2many" mode="tree">
+                            <tree string="Events">
+    <!--                                    <tree string="List of Events">-->
+                                <field name="tracking_no"/>
+                                <field name="event_timestamp"/>
+                                <field name="event_country"/>
+                                <field name="event_location"/>
+                                <field name="event_short_status"/>
+                                <field name="event_status"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Rohdaten" name="raw">
+                         <group>
+                            <field name="dhl_status"/>
+                         </group>
+                    </page>
+                    <page string="Admin" name="admin">
+                         <group>
+                            <field name="error"/>
+                            <field name="error_img"/>
+                            <field name="create_date"/>
+                            <field name="complete"/>
+                            <field name="lcall"/>
+                         </group>
+                    </page>
+                </notebook>
+            </form>
+        </field>
+    </record>
+
+    <!--Define action to get DHL Tracking Data-->
+    <record id="edit_tracking" model="ir.actions.act_window">
+        <field  name="name">Tracking Details</field>
+        <field  name="res_model">hg.tracking</field>
+        <field  name="view_mode">tree,form</field>
+        <field  name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Uups! Keine Daten gefunden.
+                </p>
+                <p>
+                    Vielleicht der falsche Filter?
+                </p>
+        </field>
+    </record>
+
+    <!--Create Top Menu-->
+    <menuitem  id="hg_track_top_menu"
+               name="DHL Tracking"
+               web_icon="hg_dhl,static/description/icon.png"
+               action="edit_tracking"
+               sequence="7"/>
+
+</odoo>
