@@ -89,7 +89,7 @@ class HgTracking(models.Model):
 
         my_wait = MyWait()  # Needed to make sure that we call DHL-functions max. 3 times per second
 
-        dhl_login_data.live = bool(self.env['ir.config_parameter'].sudo().get_param('hg_dhl.live', False))
+        dhl_login_data.live = bool(icp_env.get_param('hg_dhl.live', False))
 
         if dhl_login_data.live:
             login_data = dhl_login_data.DhlLogin

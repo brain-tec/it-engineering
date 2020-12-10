@@ -97,5 +97,6 @@
               name="Settings"
               parent="trackings_top_menu"
               action="tracking_settings_action"
+              groups="base.group_system"
               sequence="100"/>
 </odoo>
