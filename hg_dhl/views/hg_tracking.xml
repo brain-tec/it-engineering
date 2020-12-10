@@ -26,20 +26,21 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="tracking_no"/>
-                        <field name="delivery"/>
-                        <field name="product_name"/>
+                        <group>
+                            <field name="tracking_no"/>
+                            <field name="pan_recipient_address"/>
+                            <field name="dest_country"/>
+                            <field name="recipient_name"/>
+                            <field name="recipient_id_text"/>
+                            <field name="status"/>
+                            <field name="status_timestamp"/>
+                        </group>
 
-                        <field name="pan_recipient_address"/>
-                        <field name="dest_country"/>
-
-                        <field name="recipient_name"/>
-                        <field name="recipient_id_text"/>
-
-                        <field name="status"/>
-                        <field name="status_timestamp"/>
-
-                        <field name="image" widget="image" attrs="{'invisible': [('image', '=', False)]}"/>
+                        <group>
+                            <field name="delivery"/>
+                            <field name="product_name"/>
+                            <field name="image" widget="image" attrs="{'invisible': [('image', '=', False)]}"/>
+                        </group>
                     </group>
 
                     <notebook>
@@ -66,10 +67,10 @@
 
                         <page string="Advanced Info" name="admin">
                             <group>
-                                <field name="error"/>
-                                <field name="error_image"/>
                                 <field name="create_date"/>
                                 <field name="last_call"/>
+                                <field name="error"/>
+                                <field name="error_image"/>
                                 <field name="done"/>
                             </group>
                         </page>
