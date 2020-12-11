@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        <record id="hg_dhl_tracking_cron" model="ir.cron">
-            <field name="name">HG_DHL: Get Tracking Information</field>
+        <record id="trackings_cron" model="ir.cron">
+            <field name="name">HG: Update all open trackings</field>
             <field name="model_id" ref="hg_dhl.model_hg_tracking"/>
             <field name="state">code</field>
-            <field name="code">model.get_tracking_all()</field>
+            <field name="code">model.get_all_trackings_data(days_for_done=30, batch_size=5)</field>
             <field name="interval_type">days</field>
             <field name="numbercall">-1</field>
         </record>
