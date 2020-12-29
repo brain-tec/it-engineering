@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_hg_tracking">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>DHL Tracking Details</h2>
+                        <div class="row mt32 mb32">
+                            <!-- Information window starts here -->
+                            <div class="col-7">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Tracking-Nr.:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.tracking_no"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Lieferschein:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.delivery"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Lieferadresse:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.pan_recipient_address"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Empfängerland:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.dest_country"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Empfänger:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.recipient_name"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Angenommen durch:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.recipient_id_text"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Status:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.status"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Status vom:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.status_timestamp"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>DHL Produkt:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.product_name"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- signature window starts here -->
+                            <div class="col-6">
+                                <strong>Unterschrift:</strong>
+                                <div>
+                                    <img t-attf-src="data:image/*;base64,{{doc.image}}"/>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Zeitstempel</th>
+                                    <th>Land</th>
+                                    <th>Stadt</th>
+                                    <th>Status</th>
+                                    <th>Statustext</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="doc.event_ids" t-as="line">
+                                    <td style="white-space:nowrap">
+                                        <span t-field="line.event_timestamp"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="line.event_country"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="line.event_location"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="line.event_short_status"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="line.event_status"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+
+    <report
+            id="report_hg_tracking"
+            string="DHL Tracking Details"
+            model="hg.tracking"
+            report_type="qweb-pdf"
+            name="hg_dhl.report_hg_tracking"
+            file="hg_dhl.report_hg_tracking"
+    />
+</odoo>
