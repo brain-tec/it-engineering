@@ -48,9 +48,12 @@ class HgTracking(models.Model):
 
     tracking_no = fields.Char(string='Tracking No', required=True)
     delivery = fields.Char(string='Delivery')
+    _sql_constraints = [('unique_field','unique(tracking_no,delivery)',
+                         'Combination of Tracking Number and Delivery must be unique!')]
     raw_xml_status = fields.Text(string='Raw XML Status', readonly=True, copy=False)
     last_call = fields.Datetime('Last Call to DHL Server on', readonly=True, copy=False)
-    done = fields.Boolean('Done', readonly=True, copy=False)
+    # the below flag can be changed by the user. He can set it to done, if he checked a uncomplete tracking.
+    done = fields.Boolean('Done', copy=False)
     error = fields.Char(string='Last Status Error', readonly=True, copy=False)
     error_image = fields.Char(string='Last Signature Error', readonly=True, copy=False)
 
@@ -115,82 +118,85 @@ class HgTracking(models.Model):
                         '/>')
 
         for tracking in self:
-            # Note that here we are not filtering out done trackings; this way, we can force the operation on
-            # trackings that are already done
+            # Note that here we are filtering out done trackings; we can force the operation on
+            # trackings that are already done by removing the done flag.
+            # Reason is that after 90 days the user should not accidentally call dhl again because
+            # if the data is not found, the data could be destroyed in our data base.
 
-            tracking_no = tracking.tracking_no.zfill(20)
+            if not tracking.done:
+                tracking_no = tracking.tracking_no.zfill(20)
 
-            url_detail = url_template.format(server=login_data.server,
-                                             app_name=login_data.app_name,
-                                             app_pwd=login_data.app_pwd,
-                                             tracking_no=tracking_no,
-                                             request="d-get-piece-detail")
+                url_detail = url_template.format(server=login_data.server,
+                                                 app_name=login_data.app_name,
+                                                 app_pwd=login_data.app_pwd,
+                                                 tracking_no=tracking_no,
+                                                 request="d-get-piece-detail")
 
-            url_signature = url_template.format(server=login_data.server,
-                                                app_name=login_data.app_name,
-                                                app_pwd=login_data.app_pwd,
-                                                tracking_no=tracking_no,
-                                                request="d-get-signature")
+                url_signature = url_template.format(server=login_data.server,
+                                                    app_name=login_data.app_name,
+                                                    app_pwd=login_data.app_pwd,
+                                                    tracking_no=tracking_no,
+                                                    request="d-get-signature")
 
-            my_wait.wait()
-
-            # Connects to the DHL Server and requests event details
-            req = requests.get(url_detail, auth=(login_data.user, login_data.pwd))
-
-            try:
-                req_content = objectify.fromstring(req.content)
-            except Exception:
-                raise UserError(_('Error on getting tracking data from the DHL Server. '
-                                  'Please make sure the login data in the Settings page is correct.'))
-
-            tracking.raw_xml_status = req.content
-            tracking.last_call = datetime.now()
-
-            if req_content.attrib['code'] == '0':
-                # No error; tracking data and events updated
-                tracking.error = None
-
-                for x in self._fields:
-                    y = x.replace('_', '-')
-
-                    try:
-                        tracking[x] = req_content.data.attrib[y]
-                    except Exception:
-                        pass
-
-                tracking._update_events(req_content)
-            else:
-                # There was an error with the event details request
-                tracking.error = req_content.attrib['error']
-
-            if tracking.short_status == SUCCESSFUL_DELIVERY_STATUS:
                 my_wait.wait()
 
-                # Connects to the DHL Server and requests the signature
-                req = requests.get(url_signature, auth=(login_data.user, login_data.pwd))
+                # Connects to the DHL Server and requests event details
+                req = requests.get(url_detail, auth=(login_data.user, login_data.pwd))
 
                 try:
                     req_content = objectify.fromstring(req.content)
                 except Exception:
-                    raise UserError(_('Error on requesting signature from the DHL Server. '
-                                      'Please contact your admin.'))
+                    raise UserError(_('Error on getting tracking data from the DHL Server. '
+                                      'Please make sure the login data in the Settings page is correct.'))
+
+                tracking.raw_xml_status = req.content
+                tracking.last_call = datetime.now()
 
                 if req_content.attrib['code'] == '0':
-                    # No error; tracking signature updated
-                    tracking.error_img = None
+                    # No error; tracking data and events updated
+                    tracking.error = None
 
-                    image = bytes.fromhex(req_content.data.attrib['image'])
-                    tracking.image = b64encode(image)
+                    for x in self._fields:
+                        y = x.replace('_', '-')
+
+                        try:
+                            tracking[x] = req_content.data.attrib[y]
+                        except Exception:
+                            pass
+
+                    tracking._update_events(req_content)
                 else:
-                    # There was an error with the signature request
-                    tracking.error_image = req_content.attrib['error']
+                    # There was an error with the event details request
+                    tracking.error = req_content.attrib['error']
 
-            # Marks the tracking as done if a successful delivery status was received was successful or if more
-            # than <days_for_done> days have  passed since the creation of the tracking
-            diff = date.today() - tracking.create_date.date()
+                if tracking.short_status == SUCCESSFUL_DELIVERY_STATUS:
+                    my_wait.wait()
 
-            if diff.days > days_for_done or tracking.short_status == SUCCESSFUL_DELIVERY_STATUS:
-                tracking.done = True
+                    # Connects to the DHL Server and requests the signature
+                    req = requests.get(url_signature, auth=(login_data.user, login_data.pwd))
+
+                    try:
+                        req_content = objectify.fromstring(req.content)
+                    except Exception:
+                        raise UserError(_('Error on requesting signature from the DHL Server. '
+                                          'Please contact your admin.'))
+
+                    if req_content.attrib['code'] == '0':
+                        # No error; tracking signature updated
+                        tracking.error_img = None
+
+                        image = bytes.fromhex(req_content.data.attrib['image'])
+                        tracking.image = b64encode(image)
+                    else:
+                        # There was an error with the signature request
+                        tracking.error_image = req_content.attrib['error']
+
+                # Marks the tracking as done if a successful delivery status was received was successful or if more
+                # than <days_for_done> days have  passed since the creation of the tracking
+                diff = date.today() - tracking.create_date.date()
+
+                if diff.days > days_for_done or tracking.short_status == SUCCESSFUL_DELIVERY_STATUS:
+                    tracking.done = True
 
     @api.model
     def get_all_trackings_data(self, days_for_done=30, batch_size=5):

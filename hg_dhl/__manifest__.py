@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'HG DHL Tracking',
-    'version': '13.0.1.0',
+    'version': '13.0.1.1',
     'category': 'Warehouse',
     'summary': 'HG DHL Tracking',
     'author': 'Harald',
@@ -14,7 +14,8 @@
         'security/ir.model.access.csv',
         'views/hg_tracking.xml',
         'data/hg_cron.xml',
-        'views/res_config_settings.xml'
+        'views/res_config_settings.xml',
+        'reports/report.xml'
     ],
     'demo': [
     ],

@@ -4,17 +4,16 @@
         <field name="name">hg.tracking.tree.view</field>
         <field name="model">hg.tracking</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree default_order="tracking_no desc">
                 <field name="tracking_no"/>
                 <field name="delivery"/>
-                <field name="product_name"/>
                 <field name="pan_recipient_address"/>
                 <field name="dest_country"/>
                 <field name="status_timestamp"/>
-                <field name="status"/>
+                <field name="short_status"/>
                 <field name="recipient_name"/>
-                <field name="recipient_id_text"/>
                 <field name="done"/>
+                <field name="error"/>
             </tree>
         </field>
     </record>
@@ -32,6 +31,7 @@
                             <field name="dest_country"/>
                             <field name="recipient_name"/>
                             <field name="recipient_id_text"/>
+                            <field name="short_status"/>
                             <field name="status"/>
                             <field name="status_timestamp"/>
                         </group>
