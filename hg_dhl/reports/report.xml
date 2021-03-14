@@ -128,7 +128,7 @@
 
 
     <report
-            id="report_hg_tracking"
+            id="action_report_hg_tracking"
             string="DHL Tracking Details"
             model="hg.tracking"
             report_type="qweb-pdf"
