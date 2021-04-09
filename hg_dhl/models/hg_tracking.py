@@ -47,7 +47,7 @@ class HgTracking(models.Model):
     _rec_name = 'tracking_no'
 
     tracking_no = fields.Char(string='Tracking No', required=True)
-    delivery = fields.Char(string='Delivery')
+    delivery = fields.Char(string='Delivery', copy=False)
     _sql_constraints = [('unique_field','unique(tracking_no,delivery)',
                          'Combination of Tracking Number and Delivery must be unique!')]
     raw_xml_status = fields.Text(string='Raw XML Status', readonly=True, copy=False)
@@ -56,10 +56,15 @@ class HgTracking(models.Model):
     done = fields.Boolean('Done', copy=False)
     error = fields.Char(string='Last Status Error', readonly=True, copy=False)
     error_image = fields.Char(string='Last Signature Error', readonly=True, copy=False)
+    # return piece code contains the tracking number in case of a return delivery
+    return_piece_code = fields.Char(string='Return Tracking No', readonly=True, copy=False)
 
     # All these field names come from DHL ==> do not change!
     # If we need to keep track of more tracking data, just create more fields named following DHL's lead
+    piece_code = fields.Char(string='Piece Code', readonly=True, copy=False)
     product_name = fields.Char(string='Product', readonly=True, copy=False)
+    # product-code = 00 means normal sending; product-code = 47 means return
+    product_code = fields.Char(string='Product Code', readonly=True, copy=False)
     pan_recipient_address = fields.Char(string='Destination Address', readonly=True, copy=False)
     dest_country = fields.Char(string='Destination Country', readonly=True, copy=False)
     recipient_name = fields.Char(string='Recipient', readonly=True, copy=False)
@@ -197,6 +202,20 @@ class HgTracking(models.Model):
 
                 if diff.days > days_for_done or tracking.short_status == SUCCESSFUL_DELIVERY_STATUS:
                     tracking.done = True
+            # check if product_code is not yet set
+            if tracking.product_code == False:
+                # not set, so we take it from the raw data
+                try:
+                    req_content = objectify.fromstring(tracking.raw_xml_status.encode('utf-8'))
+                    if req_content.attrib['code'] == '0':
+                        tracking.product_code = req_content.data.attrib['product-code']
+                        tracking.piece_code = req_content.data.attrib['piece-code']
+                except Exception:
+                    pass
+            if tracking.product_code == '47':  # This is a return delivery
+                if tracking.return_piece_code == False:
+                    # not yet set, we have to copy the piece code
+                    tracking.return_piece_code = tracking.piece_code
 
     @api.model
     def get_all_trackings_data(self, days_for_done=30, batch_size=5):

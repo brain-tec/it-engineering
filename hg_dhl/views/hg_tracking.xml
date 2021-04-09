@@ -11,6 +11,7 @@
                 <field name="dest_country"/>
                 <field name="status_timestamp"/>
                 <field name="short_status"/>
+                <field name="return_piece_code"/>
                 <field name="recipient_name"/>
                 <field name="done"/>
                 <field name="error"/>
@@ -34,11 +35,13 @@
                             <field name="short_status"/>
                             <field name="status"/>
                             <field name="status_timestamp"/>
+                            <field name="product_name"/>
+                            <field name="product_code"/>
+                            <field name="return_piece_code"/>
                         </group>
 
                         <group>
                             <field name="delivery"/>
-                            <field name="product_name"/>
                             <field name="image" widget="image" attrs="{'invisible': [('image', '=', False)]}"/>
                         </group>
                     </group>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="report_hg_tracking">
+    <template id="t_report_hg_tracking">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
                 <t t-call="web.external_layout">
@@ -81,6 +81,14 @@
                                         <span t-field="doc.product_name"/>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <strong>Retouren-Nr.:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.return_piece_code"/>
+                                    </div>
+                                </div>
                             </div>
                             <!-- signature window starts here -->
                             <div class="col-6">
@@ -128,11 +136,11 @@
 
 
     <report
-            id="action_report_hg_tracking"
+            id="a_report_hg_tracking"
             string="DHL Tracking Details"
             model="hg.tracking"
             report_type="qweb-pdf"
-            name="hg_dhl.report_hg_tracking"
-            file="hg_dhl.report_hg_tracking"
+            name="hg_dhl.t_report_hg_tracking"
+            file="hg_dhl.t_report_hg_tracking"
     />
 </odoo>
