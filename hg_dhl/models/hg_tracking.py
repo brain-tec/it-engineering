@@ -43,6 +43,7 @@ class MyWait:
 class HgTracking(models.Model):
     _name = 'hg.tracking'
     _description = 'DHL Tracking'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'delivery, tracking_no'
     _rec_name = 'tracking_no'
 
