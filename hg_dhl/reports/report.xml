@@ -27,6 +27,14 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-4">
+                                        <strong>Liefertermin:</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span t-field="doc.delivery_date"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
                                         <strong>Lieferadresse:</strong>
                                     </div>
                                     <div class="col-6">
