@@ -3,7 +3,8 @@ from odoo.exceptions import UserError
 from . import dhl_login_data
 
 from base64 import b64encode
-from datetime import date, datetime
+#from datetime import date, datetime
+import datetime
 from math import ceil
 from time import sleep, time
 
@@ -49,6 +50,7 @@ class HgTracking(models.Model):
 
     tracking_no = fields.Char(string='Tracking No', required=True)
     delivery = fields.Char(string='Delivery', copy=False)
+    delivery_date = fields.Date(string='Delivery Date', copy=False)
     _sql_constraints = [('unique_field','unique(tracking_no,delivery)',
                          'Combination of Tracking Number and Delivery must be unique!')]
     raw_xml_status = fields.Text(string='Raw XML Status', readonly=True, copy=False)
@@ -59,6 +61,8 @@ class HgTracking(models.Model):
     error_image = fields.Char(string='Last Signature Error', readonly=True, copy=False)
     # return piece code contains the tracking number in case of a return delivery
     return_piece_code = fields.Char(string='Return Tracking No', readonly=True, copy=False)
+    arrival_date = fields.Date(string='Arrival Date', readonly=True, copy=False)
+    delay = fields.Integer(string='Delayed', readonly=True, copy=False)
 
     # All these field names come from DHL ==> do not change!
     # If we need to keep track of more tracking data, just create more fields named following DHL's lead
@@ -92,6 +96,28 @@ class HgTracking(models.Model):
                     vals[x] = event_content.attrib[y]
 
             event_env.create(vals)
+
+    def _fill_timestamp_field(self):
+        event_env = self.env['hg.tracking.event']
+
+        for ev in self.event_ids:
+            if ev.timestamp == False:
+                # we move the timestamp in a datetime field
+                format = "%d.%m.%Y %H:%M"
+                ts = datetime.datetime.strptime(ev.event_timestamp, format)
+                ts = ts.astimezone()
+                ts = ts.astimezone(datetime.timezone.utc)
+                ev.timestamp  = ts.replace(tzinfo=None)
+
+            # we store the arrival date in date format and compute delay days
+            # positiv value is too late
+            # negative value means it arrived before delivery date
+            if ev.event_short_status == SUCCESSFUL_DELIVERY_STATUS:
+                if self.arrival_date == False:
+                    self.arrival_date=ev.timestamp
+                if self.delivery_date != False:
+                    delay = self.arrival_date - self.delivery_date
+                    self.delay = delay.days
 
     def get_tracking_data(self, days_for_done=30):
         icp_env = self.env['ir.config_parameter'].sudo()
@@ -156,7 +182,7 @@ class HgTracking(models.Model):
                                       'Please make sure the login data in the Settings page is correct.'))
 
                 tracking.raw_xml_status = req.content
-                tracking.last_call = datetime.now()
+                tracking.last_call = datetime.datetime.now()
 
                 if req_content.attrib['code'] == '0':
                     # No error; tracking data and events updated
@@ -199,10 +225,15 @@ class HgTracking(models.Model):
 
                 # Marks the tracking as done if a successful delivery status was received was successful or if more
                 # than <days_for_done> days have  passed since the creation of the tracking
-                diff = date.today() - tracking.create_date.date()
+                diff = datetime.date.today() - tracking.create_date.date()
 
                 if diff.days > days_for_done or tracking.short_status == SUCCESSFUL_DELIVERY_STATUS:
                     tracking.done = True
+
+            #fill the timestamp field with datetime format. This is for compatibility reasons to fill
+            #old records created before the timstamp field was introduced
+            tracking._fill_timestamp_field()
+
             # check if product_code is not yet set
             if tracking.product_code == False:
                 # not set, so we take it from the raw data
@@ -244,6 +275,7 @@ class HgTrackingEvent(models.Model):
     _order = 'tracking_id, event_timestamp DESC'
 
     tracking_id = fields.Many2one('hg.tracking', string='Tracking Reference')
+    timestamp = fields.Datetime(string='Date&Time')
 
     # All these field names come from DHL ==> do not change!
     # If we need to keep track of more event data, just create more fields named following DHL's lead
