@@ -7,6 +7,9 @@
             <tree default_order="tracking_no desc">
                 <field name="tracking_no"/>
                 <field name="delivery"/>
+                <field name="delivery_date"/>
+                <field name="arrival_date"/>
+                <field name="delay"/>
                 <field name="pan_recipient_address"/>
                 <field name="dest_country"/>
                 <field name="status_timestamp"/>
@@ -42,6 +45,9 @@
 
                         <group>
                             <field name="delivery"/>
+                            <field name="delivery_date"/>
+                            <field name="arrival_date"/>
+                            <field name="delay"/>
                             <field name="image" widget="image" attrs="{'invisible': [('image', '=', False)]}"/>
                         </group>
                     </group>
@@ -49,12 +55,13 @@
                     <notebook>
                         <page string="Events" name="main">
                             <field name="event_ids">
-                                <tree>
+                                <tree default_order="timestamp desc, event_timestamp desc">
                                     <field name="event_timestamp"/>
                                     <field name="event_country"/>
                                     <field name="event_location"/>
                                     <field name="event_short_status"/>
                                     <field name="event_status"/>
+                                    <field name="timestamp"/>
                                 </tree>
                                 <form>
                                     <group>
@@ -63,6 +70,7 @@
                                         <field name="event_location"/>
                                         <field name="event_short_status"/>
                                         <field name="event_status"/>
+                                        <field name="timestamp"/>
                                     </group>
                                 </form>
                             </field>
